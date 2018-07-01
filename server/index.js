@@ -15,10 +15,10 @@ app.use(cors({ origin }));
 // Log all requests
 app.use(async (ctx, next) => {
   const start = Date.now();
-  await next() // This will pause this function until the endpoint handler has resolved
+  await next(); // This will pause this function until the endpoint handler has resolved
   const responseTime = Date.now() - start;
   log.info(`${ctx.method} ${ctx.status} ${ctx.url} - ${responseTime} ms`);
-})
+});
 
 //Error Handler - All uncaught exceptions will percolate up to here
 app.use(async (ctx, next) => {
@@ -35,4 +35,4 @@ app.use(async (ctx, next) => {
 app.use(api.routes(), api.allowedMethods());
 
 // Start the app
-app.listen(port, () => { log.info(`Server listening at port ${port}`) });
+app.listen(port, () => { log.info(`Server listening at port ${port}`); });
