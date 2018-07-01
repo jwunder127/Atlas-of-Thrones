@@ -1,3 +1,0 @@
-/**
- * Postgres DB Module
- */
