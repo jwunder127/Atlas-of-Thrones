@@ -21,9 +21,9 @@ class ViewController {
     }
 
     this.locationPointTypes = [ 'castle', 'city', 'town', 'ruin', 'region', 'landmark' ];
+    this.searchService = new SearchService();
     this.initializeComponents();
     this.loadMapData();
-    this.searchService = new SearchService();
   }
 
     /** Initialize Components with data and event listeners */
