@@ -2,8 +2,11 @@ import './main.scss';
 import template from './main.html';
 
 import { InfoPanel } from './components/info-panel/info-panel';
+import { LayerPanel } from './components/layer-panel/layer-panel'
 import { Map } from './components/map/map';
+import { SearchBar } from './components/search-bar/search-bar';
 import { ApiService } from './services/api';
+import { SearchService } from './services/search';
 
 /** Main UI Controller Class */
 class ViewController {
@@ -20,6 +23,7 @@ class ViewController {
     this.locationPointTypes = [ 'castle', 'city', 'town', 'ruin', 'region', 'landmark' ];
     this.initializeComponents();
     this.loadMapData();
+    this.searchService = new SearchService();
   }
 
     /** Initialize Components with data and event listeners */
@@ -35,6 +39,26 @@ class ViewController {
           this.infoComponent.showInfo(name, id, type);
         }}
       });
+      // Initialize Layer Toggle Panel
+      this.layerPanel = new LayerPanel('layer-panel-placeholder', {
+        data: { layerNames: ['kingdom', ...this.locationPointTypes] },
+        events: { layerToggle:
+          // Toggle layer in map controller on "layerToggle" event
+          event => { this.mapComponent.toggleLayer(event.detail); }}
+      });
+          // Initialize Search Panel
+      this.searchBar = new SearchBar('search-panel-placeholder', {
+        data: { searchService: this.searchService },
+        events: { resultSelected: event => {
+          // Show result on map when selected from search results
+          let searchResult = event.detail;
+          if (!this.mapComponent.isLayerShowing(searchResult.layerName)) {
+            // Show result layer if currently hidden
+            this.layerPanel.toggleMapLayer(searchResult.layerName);
+          }
+          this.mapComponent.selectLocation(searchResult.id, searchResult.layerName);
+        }}
+      });
     }
 
       /** Load map data from the API */
@@ -42,22 +66,28 @@ class ViewController {
     // Download kingdom boundaries
     const kingdomsGeojson = await this.api.getKingdoms();
 
+    // Add boundary data to search service
+    this.searchService.addGeoJsonItems(kingdomsGeojson, 'kingdom');
+
     // Add data to map
     this.mapComponent.addKingdomGeojson(kingdomsGeojson);
 
     // Show kingdom boundaries
-    this.mapComponent.toggleLayer('kingdom');
+    this.layerPanel.toggleMapLayer('kingdom');
 
     // Download location point geodata
     for (let locationType of this.locationPointTypes) {
       // Download GeoJSON + metadata
       const geojson = await this.api.getLocations(locationType);
 
+      // Add location data to search service
+      this.searchService.addGeoJsonItems(geojson, locationType);
+
       // Add data to map
       this.mapComponent.addLocationGeojson(locationType, geojson, this.getIconUrl(locationType));
 
       // Display location layer
-      this.mapComponent.toggleLayer(locationType);
+      this.layerPanel.toggleMapLayer(locationType);
     }
   }
 

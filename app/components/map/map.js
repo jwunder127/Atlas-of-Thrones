@@ -105,4 +105,28 @@ export class Map extends Component {
         this.map.addLayer(layer);
       }
     }
+      /** Check if layer is added to map  */
+    isLayerShowing (layerName) {
+      return this.map.hasLayer(this.layers[layerName]);
+    }
+
+    /** Trigger "click" on layer with provided name */
+    selectLocation (id, layerName) {
+      // Find selected layer
+      const geojsonLayer = this.layers[layerName];
+      const sublayers = geojsonLayer.getLayers();
+      const selectedSublayer = sublayers.find(layer => {
+        return layer.feature.geometry.properties.id === id;
+      });
+
+      // Zoom map to selected layer
+      if (selectedSublayer.feature.geometry.type === 'Point') {
+        this.map.flyTo(selectedSublayer.getLatLng(), 5);
+      } else {
+        this.map.flyToBounds(selectedSublayer.getBounds(), 5);
+      }
+
+      // Fire click event
+      selectedSublayer.fireEvent('click');
+    }
 }
