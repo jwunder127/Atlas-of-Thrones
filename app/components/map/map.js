@@ -98,11 +98,11 @@ export class Map extends Component {
 
       /** Toggle map layer visibility */
     toggleLayer (layerName) {
-      const layer = this.layers[layerName]
+      const layer = this.layers[layerName];
       if (this.map.hasLayer(layer)) {
-        this.map.removeLayer(layer)
+        this.map.removeLayer(layer);
       } else {
-        this.map.addLayer(layer)
+        this.map.addLayer(layer);
       }
     }
 }
